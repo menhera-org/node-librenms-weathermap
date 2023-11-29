@@ -1,0 +1,47 @@
+{
+  "title": "Example traffic weathermap",
+  "width": 1280,
+  "height": 720,
+  "devices": [
+    {
+      "type": "router",
+      "name": "router1",
+      "render_x": 320,
+      "render_y": 360,
+      "label_position": "bottom"
+    },
+    {
+      "type": "router",
+      "name": "router2",
+      "render_x": 960,
+      "render_y": 360,
+      "label_position": "bottom",
+      "librenms_hostname": "router2.example.com",
+      "connections": [
+        {
+          "peer": "router1",
+          "interface_name": "ge-0/0/0",
+          "speed": "1G"
+        }
+      ]
+    }
+  ],
+  "sites": [
+    {
+      "name": "site1",
+      "render_x": 160,
+      "render_y": 180,
+      "width": 320,
+      "height": 360,
+      "label_position": "bottom"
+    },
+    {
+      "name": "site2",
+      "render_x": 800,
+      "render_y": 180,
+      "width": 320,
+      "height": 360,
+      "label_position": "bottom"
+    }
+  ]
+}
