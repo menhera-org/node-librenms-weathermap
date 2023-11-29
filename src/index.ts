@@ -413,5 +413,5 @@ export const render = (renderData: RenderData): string => {
     elements.push(renderDevice(device));
   }
   elements.push(renderDate(renderData));
-  return renderToSvg(renderData.title, renderData.width, renderData.height, elements, defsElements);
+  return renderToSvg(renderData.title, renderData.width, renderData.height, elements, [... new Set(defsElements)]);
 };
