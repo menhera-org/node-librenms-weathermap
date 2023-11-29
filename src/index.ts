@@ -48,10 +48,10 @@ export const DEFAULT_COLORS: Readonly<ColorDefinition> = {
   [-1]: '#cccccc', // inactive
   0: '#000000',
   1000000: '#0000ff',
-  10000000: '#00ffff',
+  10000000: '#00cccc',
   25000000: '#00ff00',
-  50000000: '#ffff00',
-  75000000: '#ff8000',
+  50000000: '#cccc00',
+  75000000: '#ee7000',
   100000000: '#ff0000',
 };
 
