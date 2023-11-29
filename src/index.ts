@@ -335,7 +335,7 @@ const renderConnection = (connection: ConnectionData, colors: ColorDefinition): 
   let inboundTrafficLabelX = middleX + normalizedVectorX * (trafficTextWidth / 2 + 8 + strokeWidth * 6);
   let inboundTrafficLabelY = middleY + normalizedVectorY * (trafficTextWidth / 2 + 8 + strokeWidth * 6);
   if (spanY > 48 && spanX < 192) {
-    const factor = (8 + strokeWidth * 6) / Math.abs(normalizedVectorY);
+    const factor = (12 + strokeWidth * 6) / Math.abs(normalizedVectorY);
     outboundTrafficLabelX = middleX - normalizedVectorX * factor;
     outboundTrafficLabelY = middleY - normalizedVectorY * factor;
     inboundTrafficLabelX = middleX + normalizedVectorX * factor;
