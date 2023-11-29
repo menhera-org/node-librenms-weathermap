@@ -251,7 +251,7 @@ export const fetchRenderData = async (config: Config): Promise<RenderData> => {
 const renderToSvg = (title: string, width: number, height: number, elements: string[]): string => {
   const content = elements.join('\n');
   return `<!-- Rendered with node-librenms-weathermap -->
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 ${width} ${height}" font-family="sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}" font-family="sans-serif">
 <defs>
   <g id="router" transform="translate(-25, -25)">
     <ellipse cx="25" cy="25" rx="25" ry="25" fill="#fafafa" stroke="none"/>
