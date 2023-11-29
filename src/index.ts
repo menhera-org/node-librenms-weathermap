@@ -375,9 +375,11 @@ const renderSite = (site: SiteData): string => {
   return `${siteSvg}\n${labelSvg}`;
 };
 
-const renderDate = (): string => {
+const renderDate = (renderData: RenderData): string => {
+  const x = renderData.width - 8;
+  const y = renderData.height - 8;
   const date = (new Date()).toISOString().replace(/T/, ' ').replace(/\..+/, '');
-  return `<text x="100%" y="100%" text-anchor="end" font-size="12" fill="#000000" stroke="none">${xmlescape(date)}</text>`;
+  return `<text x="${x}" y="${y}" text-anchor="end" font-size="12" fill="#000000" stroke="none">${xmlescape(date)}</text>`;
 };
 
 export const render = (renderData: RenderData): string => {
@@ -393,6 +395,6 @@ export const render = (renderData: RenderData): string => {
   for (const device of renderData.devices) {
     elements.push(renderDevice(device));
   }
-  elements.push(renderDate());
+  elements.push(renderDate(renderData));
   return renderToSvg(renderData.title, renderData.width, renderData.height, elements);
 };
