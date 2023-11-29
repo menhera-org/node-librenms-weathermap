@@ -248,8 +248,9 @@ export const fetchRenderData = async (config: Config): Promise<RenderData> => {
   return renderData;
 };
 
-const renderToSvg = (title: string, width: number, height: number, elements: string[]): string => {
+const renderToSvg = (title: string, width: number, height: number, elements: string[], defsElements: string[] = []): string => {
   const content = elements.join('\n');
+  const defsContent = defsElements.join('\n  ');
   return `<!-- Rendered with node-librenms-weathermap -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}" font-family="sans-serif">
 <defs>
@@ -264,23 +265,17 @@ const renderToSvg = (title: string, width: number, height: number, elements: str
   <g id="cloud" transform="translate(-64, -40)">
     <path d="M 30 20 C 6 20 0 40 19.2 44 C 0 52.8 21.6 72 37.2 64 C 48 80 84 80 96 64 C 120 64 120 48 105 40 C 120 24 96 8 75 16 C 60 4 36 4 30 20 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
   </g>
-  <marker
-    id="arrow"
-    viewBox="0 0 10 10"
-    refX="8"
-    refY="5"
-    markerWidth="6"
-    markerHeight="6"
-    markerUnits="strokeWidth"
-    orient="auto-start-reverse"
-    fill="context-stroke"
-  >
-    <path d="M 0 0 L 10 5 L 0 10 z"/>
-  </marker>
+  <path id="arrow-marker" d="M 0 0 L 10 5 L 0 10 z"/>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto-start-reverse" fill="context-stroke"><use xlink:href="#arrow-marker"/></marker>
+  ${defsContent}
 </defs>
 <title>${xmlescape(title)}</title>
 ${content}
 </svg>`;
+};
+
+const createArrowMarker = (color: string): string => {
+  return `<marker id="arrow-${encodeURIComponent(color)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto-start-reverse" fill="${color}"><use xlink:href="#arrow-marker"/></marker>`;
 };
 
 const renderBackground = (width: number, height: number): string => {
@@ -321,7 +316,7 @@ const getStrokeColor = (traffic: number, colors: ColorDefinition): string => {
   return colors[speed || sortedSpeeds[sortedSpeeds.length - 1]!] || '#000000';
 };
 
-const renderConnection = (connection: ConnectionData, colors: ColorDefinition): string => {
+const renderConnection = (connection: ConnectionData, colors: ColorDefinition): { arrowElements: string[], labelElements: string[], defsElements: string[] } => {
   const middleX = connection.from_x + (connection.to_x - connection.from_x) / 2;
   const middleY = connection.from_y + (connection.to_y - connection.from_y) / 2;
   const spanX = Math.abs(connection.to_x - connection.from_x);
@@ -342,11 +337,24 @@ const renderConnection = (connection: ConnectionData, colors: ColorDefinition): 
     inboundTrafficLabelX = middleX + normalizedVectorX * factor;
     inboundTrafficLabelY = middleY + normalizedVectorY * factor;
   }
-  const outboundArrow = `<path d="M ${connection.from_x} ${connection.from_y} L ${middleX} ${middleY}" stroke="${getStrokeColor(connection.outboundTraffic, colors)}" stroke-width="${strokeWidth}" marker-end="url(#arrow)"/>`;
-  const inboundArrow = `<path d="M ${connection.to_x} ${connection.to_y} L ${middleX} ${middleY}" stroke="${getStrokeColor(connection.inboundTraffic, colors)}" stroke-width="${strokeWidth}" marker-end="url(#arrow)"/>`;
+  const defsElements: string[] = [];
+  const outboundColor = getStrokeColor(connection.outboundTraffic, colors);
+  const inboundColor = getStrokeColor(connection.inboundTraffic, colors);
+  const outboundArrowMarker = createArrowMarker(outboundColor);
+  const inboundArrowMarker = createArrowMarker(inboundColor);
+  const outboundArrowMarkerId = `arrow-${encodeURIComponent(outboundColor)}`;
+  const inboundArrowMarkerId = `arrow-${encodeURIComponent(inboundColor)}`;
+  defsElements.push(outboundArrowMarker);
+  defsElements.push(inboundArrowMarker);
+  const outboundArrow = `<path d="M ${connection.from_x} ${connection.from_y} L ${middleX} ${middleY}" stroke="${outboundColor}" stroke-width="${strokeWidth}" marker-end="url(#${outboundArrowMarkerId})"/>`;
+  const inboundArrow = `<path d="M ${connection.to_x} ${connection.to_y} L ${middleX} ${middleY}" stroke="${inboundColor}" stroke-width="${strokeWidth}" marker-end="url(#${inboundArrowMarkerId})"/>`;
   const outboundTraffic = renderTraffic(outboundTrafficLabelX, outboundTrafficLabelY, connection.outboundTraffic);
   const inboundTraffic = renderTraffic(inboundTrafficLabelX, inboundTrafficLabelY, connection.inboundTraffic);
-  return `${outboundArrow}\n${inboundArrow}\n${outboundTraffic}\n${inboundTraffic}`;
+  return {
+    arrowElements: [outboundArrow, inboundArrow],
+    labelElements: [outboundTraffic, inboundTraffic],
+    defsElements,
+  };
 };
 
 const renderDevice = (device: DeviceData): string => {
@@ -385,17 +393,25 @@ const renderDate = (renderData: RenderData): string => {
 
 export const render = (renderData: RenderData): string => {
   const elements: string[] = [];
+  const defsElements: string[] = [];
   elements.push(renderBackground(renderData.width, renderData.height));
   elements.push(renderDiagramTitle(renderData.title));
   for (const site of renderData.sites) {
     elements.push(renderSite(site));
   }
+  const arrowElements: string[] = [];
+  const labelElements: string[] = [];
   for (const connection of renderData.connections) {
-    elements.push(renderConnection(connection, renderData.colors));
+    const connectionElements = renderConnection(connection, renderData.colors);
+    arrowElements.push(...connectionElements.arrowElements);
+    labelElements.push(...connectionElements.labelElements);
+    defsElements.push(...connectionElements.defsElements);
   }
+  elements.push(...arrowElements);
+  elements.push(...labelElements);
   for (const device of renderData.devices) {
     elements.push(renderDevice(device));
   }
   elements.push(renderDate(renderData));
-  return renderToSvg(renderData.title, renderData.width, renderData.height, elements);
+  return renderToSvg(renderData.title, renderData.width, renderData.height, elements, defsElements);
 };
