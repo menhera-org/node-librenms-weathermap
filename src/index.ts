@@ -275,7 +275,7 @@ ${content}
 };
 
 const createArrowMarker = (color: string): string => {
-  return `<marker id="arrow-${encodeURIComponent(color)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto-start-reverse" fill="${color}"><use xlink:href="#arrow-marker"/></marker>`;
+  return `<marker id="arrow-${color}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" markerUnits="strokeWidth" orient="auto-start-reverse" fill="${color}"><use xlink:href="#arrow-marker"/></marker>`;
 };
 
 const renderBackground = (width: number, height: number): string => {
@@ -342,8 +342,8 @@ const renderConnection = (connection: ConnectionData, colors: ColorDefinition): 
   const inboundColor = getStrokeColor(connection.inboundTraffic, colors);
   const outboundArrowMarker = createArrowMarker(outboundColor);
   const inboundArrowMarker = createArrowMarker(inboundColor);
-  const outboundArrowMarkerId = `arrow-${encodeURIComponent(outboundColor)}`;
-  const inboundArrowMarkerId = `arrow-${encodeURIComponent(inboundColor)}`;
+  const outboundArrowMarkerId = encodeURIComponent(`arrow-${outboundColor}`);
+  const inboundArrowMarkerId = encodeURIComponent(`arrow-${inboundColor}`);
   defsElements.push(outboundArrowMarker);
   defsElements.push(inboundArrowMarker);
   const outboundArrow = `<path d="M ${connection.from_x} ${connection.from_y} L ${middleX} ${middleY}" stroke="${outboundColor}" stroke-width="${strokeWidth}" marker-end="url(#${outboundArrowMarkerId})"/>`;
