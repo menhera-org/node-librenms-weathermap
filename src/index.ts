@@ -294,10 +294,10 @@ const formatTraffic = (traffic: number): string => {
   if (traffic < 0) {
     return 'Inactive';
   }
-  if (traffic < 1000000) {
+  if (traffic < 100000) {
     return `${(traffic / 1000).toFixed(2)} kbps`;
   }
-  if (traffic < 1000000000) {
+  if (traffic < 100000000) {
     return `${(traffic / 1000000).toFixed(2)} Mbps`;
   }
   return `${(traffic / 1000000000).toFixed(2)} Gbps`;
