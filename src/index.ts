@@ -45,6 +45,7 @@ export type ConnectionSpeed = '10M' | '100M' | '1G' | '10G' | '40G' | '100G';
 export type ColorDefinition = Record<number, string>; // bps -> CSS color
 
 export const DEFAULT_COLORS: Readonly<ColorDefinition> = {
+  [-1]: '#cccccc', // inactive
   0: '#000000',
   1000000: '#0000ff',
   10000000: '#00ffff',
